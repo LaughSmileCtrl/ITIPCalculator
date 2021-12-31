@@ -29,7 +29,7 @@
 
                 <div class="rounded-lg overflow-x-auto m-5">
                     <table v-if="renderState" class="p-1 text-sm text-purple-800 dark:text-white bg-purple-50 dark:bg-purple-700 w-full">
-                        <thead class="rounded-none sticky top-0 z-40 bg-purple-50 dark:bg-purple-700 p-3">
+                        <thead class="rounded-none sticky top-0 z-20 bg-purple-50 dark:bg-purple-700 p-3">
                             <tr>
                                 <th></th> 
                                 <th class="py-3">Mata Kuliah</th> 
@@ -66,13 +66,15 @@
                     </table>
                 </div>
                 <div class="justify-self-end mx-4">
-                    <button class=" btn btn-primary rounded-full px-8" @click="showResult">
+                    <button class=" btn btn-primary rounded-full px-8 md:w-56" @click="showResult">
                         Hitung
                     </button>
                 </div>
             </div>
         </div>
     </section>
+
+    <div v-if="showOverlay" class="fixed top-0 bottom-0 right-0 left-0 bg-purple-200 z-50 opacity-40"></div>
 </template>
 
 <script>
@@ -84,8 +86,12 @@ export default {
         return {
             renderState: false,
             subjects: [],
-            scores: {},
+            scores: {
+                semester: this.semester,
+            },
             errors: {},
+            url: 'http://itipcalculatormang.000webhostapp.com',
+            showOverlay: false,
         }
     },
     components: {
@@ -105,20 +111,51 @@ export default {
             })
 
             if (isFull) {
-                this.$swal('Hasil', 'IP anda di Semester ini adalah 4.00', 'success');
+                axios.post(this.url + '/api/students', this.scores, {
+                    onUploadProgress: () => {
+                       this.showOverlay = true;
+                    },
+
+
+                    onDownloadProgress: () => {
+                        this.showOverlay = true;                       
+                    },
+                })
+                .then(response => {
+                    this.$swal('IP anda di Semester ini adalah ' + response.data.result, '' , 'success');
+                })
+                .catch()
+                .then(() => {
+                    this.showOverlay = false;
+                });
+
             }
         },
         getSubjects(event) {
-            var semester = event.target.value;
-            axios.get('http://0.0.0.0/api/semesters/'+semester)
-                .then((response) => {
-                    this.subjects = response.data.data;
-                    this.renderState = true;
-                    this.subjects.forEach(subject => {
-                        this.scores[subject.subid] = null;
-                    })
-                });
-        }
+            this.scores.semester = event.target.value;
+            axios.get(this.url + '/api/semesters/'+ this.scores.semester, {
+                onUploadProgress: () => {
+                    this.showOverlay = true;
+                    
+                },
+
+
+                onDownloadProgress: () => {
+                    this.showOverlay = true;                       
+                },
+            })
+            .then((response) => {
+                this.subjects = response.data.data;
+                this.renderState = true;
+                this.subjects.forEach(subject => {
+                    this.scores[subject.subid] = null;
+                })
+            })
+            .catch()
+            .then(() => {
+                this.showOverlay = false;
+            });
+    }
     }
 }
 </script>
