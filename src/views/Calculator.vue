@@ -90,7 +90,7 @@ export default {
                 semester: this.semester,
             },
             errors: {},
-            url: 'http://itipcalculatormang.000webhostapp.com',
+            url: 'https://itipcalculatormang.000webhostapp.com',
             showOverlay: false,
         }
     },
