@@ -171,7 +171,7 @@ export default {
             semester: 0,
             scores: {},
             errors: {},
-            url: "http://0.0.0.0",
+            url: "https://itipcalculatormang.000webhostapp.com",
             showOverlay: false,
         };
     },
